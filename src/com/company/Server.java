@@ -1,9 +1,11 @@
 package com.company;
 
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.Security;
@@ -60,28 +62,51 @@ class ClientHandler extends Thread {
     }
 
     public void run () {
-        String received = "";
-        String toReturn;
+        String username = "";
+        String password = "";
+        int rowNumber;
+        int cellNumber = 0;
+        FileInputStream file = null;
+        XSSFWorkbook workbook = null;
+        XSSFSheet sheet = null;
 
-        while (true) {
+        try {
+            file = new FileInputStream(new File("Authentication.xlsx"));
+            workbook = new XSSFWorkbook(file);
+            sheet = workbook.getSheetAt(0);
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+
+        rowNumber = sheet.getLastRowNum() + 1;
+        String content = sheet.getRow(rowNumber - 1).getCell(0).getStringCellValue();
+        System.out.println(content);
+
             try {
-                while (!received.equals("Over")) {
-                    out.writeUTF("Type Over to terminate connection");
+                out.writeUTF("Give a username and a password");
 
-                    try {
-                        received = in.readUTF();
-                        System.out.println(received);
-                    } catch (Exception e) {
-                        // System.out.println(e);
-                    }
+                try {
+                    username = in.readUTF();
+                    password = in.readUTF();
+                    System.out.println(username);
+                    System.out.println(password);
+                } catch (Exception e) {
+                    System.out.println(e);
                 }
+
+                Row row = sheet.createRow(rowNumber);
+                Cell cell = row.createCell(cellNumber);
+                cell.setCellValue(username);
+                cellNumber++;
+                cell = row.createCell(cellNumber);
+                cell.setCellValue(password);
 
                 System.out.println("Closing connection");
 
                 socket.close();
                 in.close();
                 out.close();
-                break;
+
 
             } catch (IOException e){
                 try {
@@ -91,6 +116,11 @@ class ClientHandler extends Thread {
                 }
                 e.printStackTrace();
             }
+
+        try (FileOutputStream outputStream = new FileOutputStream("Authentication.xlsx")) {
+            workbook.write(outputStream);
+        } catch (IOException i) {
+            System.out.println(i);
         }
     }
 }
