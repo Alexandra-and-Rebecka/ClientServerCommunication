@@ -8,6 +8,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 import java.util.Scanner;
 import java.util.concurrent.locks.ReentrantLock;
@@ -69,6 +70,7 @@ class ClientHandler extends Thread {
     public void run () {
         String username = "";
         String password = "";
+        byte[] salt = null;
         int rowNumber;
         int cellNumber = 0;
         FileInputStream file = null;
@@ -85,6 +87,14 @@ class ClientHandler extends Thread {
                 System.out.println(e);
             }
 
+            try {
+                salt = HashPassword.getSalt();
+            } catch (NoSuchAlgorithmException e) {
+                System.out.println(e);
+            }
+
+            password = HashPassword.getHashedPassword(password, salt);
+
             lock.lock();
             try {
                 file = new FileInputStream(new File("Authentication.xlsx"));
@@ -99,6 +109,9 @@ class ClientHandler extends Thread {
                 cellNumber++;
                 cell = row.createCell(cellNumber);
                 cell.setCellValue(password);
+                cellNumber++;
+                cell = row.createCell(cellNumber);
+                cell.setCellValue(salt.toString());
 
                 FileOutputStream outputStream = new FileOutputStream("Authentication.xlsx");
                 workbook.write(outputStream);
