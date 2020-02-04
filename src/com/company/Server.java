@@ -37,19 +37,21 @@ public class Server {
 
                     Thread t = new ClientHandler(socket, in, out);
                     t.start();
+
                 } catch (Exception e) {
                     socket.close();
                 }
             }
-        }catch (IOException i) {
+        } catch (IOException i) {
             System.out.println(i);
         }
     }
+
     public static void main(String args[]) {
         Server server = new Server(5000);
     }
-
 }
+
 class ClientHandler extends Thread {
 
     ReentrantLock lock = new ReentrantLock();
@@ -73,59 +75,50 @@ class ClientHandler extends Thread {
         XSSFWorkbook workbook = null;
         XSSFSheet sheet = null;
 
+        try {
+            out.writeUTF("Give a username and a password");
+
             try {
-                out.writeUTF("Give a username and a password");
-
-                try {
-                    username = in.readUTF();
-                    password = in.readUTF();
-                    System.out.println(username);
-                    System.out.println(password);
-                } catch (Exception e) {
-                    System.out.println(e);
-                }
-
-                lock.lock();
-                try {
-                    try {
-                        file = new FileInputStream(new File("Authentication.xlsx"));
-                        workbook = new XSSFWorkbook(file);
-                        sheet = workbook.getSheetAt(0);
-                    } catch (IOException e) {
-                        System.out.println(e);
-                    }
-
-                    rowNumber = sheet.getLastRowNum() + 1;
-
-                    Row row = sheet.createRow(rowNumber);
-                    Cell cell = row.createCell(cellNumber);
-                    cell.setCellValue(username);
-                    cellNumber++;
-                    cell = row.createCell(cellNumber);
-                    cell.setCellValue(password);
-
-
-                    try (FileOutputStream outputStream = new FileOutputStream("Authentication.xlsx")) {
-                        workbook.write(outputStream);
-                    } catch (IOException i) {
-                        System.out.println(i);
-                    }
-                } finally {
-                    lock.unlock();
-                }
-                System.out.println("Closing connection");
-
-                socket.close();
-                in.close();
-                out.close();
-            } catch (IOException e){
-                try {
-                    socket.close();
-                } catch (IOException i){
-                    System.out.println(i);
-                }
-                e.printStackTrace();
+                username = in.readUTF();
+                password = in.readUTF();
+            } catch (Exception e) {
+                System.out.println(e);
             }
+
+            lock.lock();
+            try {
+                file = new FileInputStream(new File("Authentication.xlsx"));
+                workbook = new XSSFWorkbook(file);
+                sheet = workbook.getSheetAt(0);
+
+                rowNumber = sheet.getLastRowNum() + 1;
+
+                Row row = sheet.createRow(rowNumber);
+                Cell cell = row.createCell(cellNumber);
+                cell.setCellValue(username);
+                cellNumber++;
+                cell = row.createCell(cellNumber);
+                cell.setCellValue(password);
+
+                FileOutputStream outputStream = new FileOutputStream("Authentication.xlsx");
+                workbook.write(outputStream);
+            } finally {
+                lock.unlock();
+            }
+
+            System.out.println("Closing connection");
+
+            socket.close();
+            in.close();
+            out.close();
+
+        } catch (IOException e){
+            try {
+                socket.close();
+            } catch (IOException i){
+                System.out.println(i);
+            }
+        }
     }
 }
 
