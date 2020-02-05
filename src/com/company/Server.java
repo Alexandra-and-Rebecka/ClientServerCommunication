@@ -9,8 +9,6 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
-import java.security.Security;
-import java.util.Scanner;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Server {
@@ -22,7 +20,7 @@ public class Server {
 
     public Server(int port) {
         try {
-            server = new ServerSocket(port);
+            server = new ServerSocket(5000);
             System.out.println("Server started");
             System.out.println("Waiting for a client...");
 
