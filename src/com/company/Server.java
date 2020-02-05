@@ -9,6 +9,7 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Server {
@@ -66,6 +67,22 @@ class ClientHandler extends Thread {
     }
 
     public void run () {
+        String action = "";
+        try {
+            action = in.readUTF();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (action.equals("register")) {
+            register();
+        } else {
+            login();
+        }
+
+    }
+
+    private void register() {
         boolean userExists = false;
         String username = "";
         String password = "";
@@ -85,7 +102,6 @@ class ClientHandler extends Thread {
             } catch (Exception e) {
                 System.out.println(e);
             }
-
             try {
                 salt = HashPassword.getSalt();
             } catch (NoSuchAlgorithmException e) {
@@ -111,7 +127,6 @@ class ClientHandler extends Thread {
                     }
                 }
 
-
                 if (!userExists) {
                     Row row = sheet.createRow(rowNumber);
                     Cell cell = row.createCell(cellNumber);
@@ -121,13 +136,86 @@ class ClientHandler extends Thread {
                     cell.setCellValue(password);
                     cellNumber++;
                     cell = row.createCell(cellNumber);
-                    cell.setCellValue(salt.toString());
+                    cell.setCellValue(Base64.getEncoder().encodeToString(salt));
 
                     FileOutputStream outputStream = new FileOutputStream("Authentication.xlsx");
                     workbook.write(outputStream);
                     out.writeUTF("New user is registered");
                 } else {
                     out.writeUTF("User already exists");
+                }
+            } finally {
+                lock.unlock();
+            }
+
+            System.out.println("Closing connection");
+
+            socket.close();
+            in.close();
+            out.close();
+
+        } catch (IOException e){
+            try {
+                socket.close();
+            } catch (IOException i){
+                System.out.println(i);
+            }
+        }
+    }
+
+    private void login() {
+        boolean userExists = false;
+        String username = "";
+        String password = "";
+        int rowNumber;
+        FileInputStream file = null;
+        XSSFWorkbook workbook = null;
+        XSSFSheet sheet = null;
+
+        try {
+            out.writeUTF("Give a username and a password");
+
+            try {
+                username = in.readUTF();
+                password = in.readUTF();
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+
+            lock.lock();
+            try {
+                file = new FileInputStream(new File("Authentication.xlsx"));
+                workbook = new XSSFWorkbook(file);
+                sheet = workbook.getSheetAt(0);
+
+                rowNumber = sheet.getLastRowNum();
+
+                for (int i=1; i <= rowNumber; i++){
+
+                    String user = sheet.getRow(i).getCell(0).toString();
+                    if (username.equals(user)) {
+                        userExists = true;
+                        rowNumber = i;
+                        break;
+                    }
+                }
+
+                if (userExists) {
+                    String hashedPass = sheet.getRow(rowNumber).getCell(1).toString();
+                    byte[] salt = Base64.getDecoder().decode(sheet.getRow(rowNumber).getCell(2).toString());
+
+                    String hashedPass2 = HashPassword.getHashedPassword(password, salt);
+
+                    if (hashedPass.equals(hashedPass2)){
+                        out.writeUTF("Login succeeded");
+                    } else {
+                        out.writeUTF("Wrong password");
+                    }
+
+                    FileOutputStream outputStream = new FileOutputStream("Authentication.xlsx");
+                    workbook.write(outputStream);
+                } else {
+                    out.writeUTF("User doesn't exist");
                 }
             } finally {
                 lock.unlock();
