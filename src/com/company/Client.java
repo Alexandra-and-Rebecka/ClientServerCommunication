@@ -21,18 +21,12 @@ public class Client {
             System.out.println("Connected");
 
             input = new Scanner(System.in);
-
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
 
-        } catch (UnknownHostException u) {
-            System.out.println(u);
         } catch (IOException i) {
             System.out.println(i);
         }
-
-        String line = "";
-
 
         try {
             String received = in.readUTF();
@@ -41,13 +35,13 @@ public class Client {
             System.out.println(i);
         }
 
-        while (!line.equals("Over")) {
-            try {
-                line = input.nextLine();
-                out.writeUTF(line);
-            } catch (IOException i) {
-                System.out.println(i);
-            }
+        try {
+            String username = input.nextLine();
+            String password = input.nextLine();
+            out.writeUTF(username);
+            out.writeUTF(password);
+        } catch (IOException i) {
+            System.out.println(i);
         }
 
         try {
@@ -59,7 +53,7 @@ public class Client {
             System.out.println(i);
         }
     }
-        public static void main (String args[]) {
-            Client client = new Client("localhost", 5000);
-        }
+    public static void main (String args[]) {
+        Client client = new Client("localhost", 5000);
+    }
 }
