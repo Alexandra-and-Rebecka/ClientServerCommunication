@@ -66,6 +66,7 @@ class ClientHandler extends Thread {
     }
 
     public void run () {
+        boolean userExists = false;
         String username = "";
         String password = "";
         byte[] salt = null;
@@ -101,18 +102,33 @@ class ClientHandler extends Thread {
 
                 rowNumber = sheet.getLastRowNum() + 1;
 
-                Row row = sheet.createRow(rowNumber);
-                Cell cell = row.createCell(cellNumber);
-                cell.setCellValue(username);
-                cellNumber++;
-                cell = row.createCell(cellNumber);
-                cell.setCellValue(password);
-                cellNumber++;
-                cell = row.createCell(cellNumber);
-                cell.setCellValue(salt.toString());
+                for (int i=1; i < rowNumber; i++){
 
-                FileOutputStream outputStream = new FileOutputStream("Authentication.xlsx");
-                workbook.write(outputStream);
+                    String user = sheet.getRow(i).getCell(0).toString();
+                    if (username.equals(user)) {
+                        userExists = true;
+                        break;
+                    }
+                }
+
+
+                if (!userExists) {
+                    Row row = sheet.createRow(rowNumber);
+                    Cell cell = row.createCell(cellNumber);
+                    cell.setCellValue(username);
+                    cellNumber++;
+                    cell = row.createCell(cellNumber);
+                    cell.setCellValue(password);
+                    cellNumber++;
+                    cell = row.createCell(cellNumber);
+                    cell.setCellValue(salt.toString());
+
+                    FileOutputStream outputStream = new FileOutputStream("Authentication.xlsx");
+                    workbook.write(outputStream);
+                    out.writeUTF("New user is registered");
+                } else {
+                    out.writeUTF("User already exists");
+                }
             } finally {
                 lock.unlock();
             }
