@@ -4,30 +4,44 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import javax.net.ssl.*;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.Security;
 import java.util.Base64;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Server {
 
-    private Socket socket = null;
-    private ServerSocket server = null;
+    private SSLSocket socket = null;
+    private SSLServerSocket server = null;
     private DataInputStream in = null;
     private DataOutputStream out = null;
 
     public Server(int port) {
         try {
-            server = new ServerSocket(5000);
+            Security.addProvider(new BouncyCastleProvider());
+
+            KeyManagerFactory keyMgrFact = KeyManagerFactory.getInstance("SunX509");
+            keyMgrFact.init(null, "password".toCharArray());
+
+            SSLContext serverContext = SSLContext.getInstance("TLS");
+            serverContext.init(keyMgrFact.getKeyManagers(), null, SecureRandom.getInstance("DEFAULT", Security.getProvider("BC")));
+
+            SSLServerSocketFactory fact = serverContext.getServerSocketFactory();
+            SSLServerSocket server = (SSLServerSocket) fact.createServerSocket(5000);
+
             System.out.println("Server started");
             System.out.println("Waiting for a client...");
 
             while (true) {
                 try {
-                    socket = server.accept();
+                    socket = (SSLSocket) server.accept();
                     System.out.println("Client accepted");
 
                     in = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
@@ -37,16 +51,14 @@ public class Server {
 
                     Thread t = new ClientHandler(socket, in, out);
                     t.start();
-
                 } catch (Exception e) {
                     socket.close();
                 }
             }
-        } catch (IOException i) {
+        } catch (Exception i) {
             System.out.println(i);
         }
     }
-
     public static void main(String args[]) {
         Server server = new Server(5000);
     }
@@ -67,19 +79,18 @@ class ClientHandler extends Thread {
     }
 
     public void run () {
-        String action = "";
-        try {
+        String action = "register";
+        /*try {
             action = in.readUTF();
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
 
         if (action.equals("register")) {
             register();
         } else {
             login();
         }
-
     }
 
     private void register() {
