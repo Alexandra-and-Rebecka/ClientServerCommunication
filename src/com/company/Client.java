@@ -6,10 +6,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
-import java.io.DataInputStream;
-import java.io.DataOutput;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.security.KeyStore;
@@ -25,10 +22,17 @@ public class Client {
 
     public Client( String address, int port) {
         try {
+
+            KeyStore truststore = KeyStore.getInstance("PKCS12");
+            char[] truststorePassword = "AlexReb123!".toCharArray();
+            try(InputStream keyStoreData = new FileInputStream("client.trustore")){
+                truststore.load(keyStoreData, truststorePassword);
+            }
+
             Security.addProvider(new BouncyCastleProvider());
 
             TrustManagerFactory trustMgrFact = TrustManagerFactory.getInstance("SunX509");
-            trustMgrFact.init((KeyStore) null);
+            trustMgrFact.init(truststore);
 
             SSLContext clientContext = SSLContext.getInstance("TLS");
             clientContext.init(null, trustMgrFact.getTrustManagers(), SecureRandom.getInstance("DEFAULT", Security.getProvider("BC")));

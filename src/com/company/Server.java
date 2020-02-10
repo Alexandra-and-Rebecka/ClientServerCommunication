@@ -10,6 +10,7 @@ import javax.net.ssl.*;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.Security;
@@ -27,8 +28,14 @@ public class Server {
         try {
             Security.addProvider(new BouncyCastleProvider());
 
+            KeyStore keyStore = KeyStore.getInstance("PKCS12");
+            char[] keyStorePassword = "AlexReb123!".toCharArray();
+            try(InputStream keyStoreData = new FileInputStream("server.keystore")){
+                keyStore.load(keyStoreData, keyStorePassword);
+            }
+
             KeyManagerFactory keyMgrFact = KeyManagerFactory.getInstance("SunX509");
-            keyMgrFact.init(null, "password".toCharArray());
+            keyMgrFact.init(keyStore, keyStorePassword);
 
             SSLContext serverContext = SSLContext.getInstance("TLS");
             serverContext.init(keyMgrFact.getKeyManagers(), null, SecureRandom.getInstance("DEFAULT", Security.getProvider("BC")));
