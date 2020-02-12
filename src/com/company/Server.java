@@ -10,10 +10,7 @@ import javax.net.ssl.*;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.security.KeyStore;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.Security;
+import java.security.*;
 import java.util.Base64;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -24,13 +21,13 @@ public class Server {
     private DataInputStream in = null;
     private DataOutputStream out = null;
 
-    public Server(int port) {
+    public Server(int port) throws KeyStoreException {
         try {
             Security.addProvider(new BouncyCastleProvider());
 
             KeyStore keyStore = KeyStore.getInstance("PKCS12");
             char[] keyStorePassword = "AlexReb123!".toCharArray();
-            try(InputStream keyStoreData = new FileInputStream("server.keystore")){
+            try(InputStream keyStoreData = new FileInputStream("server.keystore")) {
                 keyStore.load(keyStoreData, keyStorePassword);
             }
 
@@ -66,7 +63,7 @@ public class Server {
             System.out.println(i);
         }
     }
-    public static void main(String args[]) {
+    public static void main(String args[]) throws KeyStoreException {
         Server server = new Server(5000);
     }
 }
@@ -87,11 +84,11 @@ class ClientHandler extends Thread {
 
     public void run () {
         String action = "register";
-        /*try {
+        try {
             action = in.readUTF();
         } catch (IOException e) {
             e.printStackTrace();
-        }*/
+        }
 
         if (action.equals("register")) {
             register();

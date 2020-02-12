@@ -25,7 +25,7 @@ public class Client {
 
             KeyStore truststore = KeyStore.getInstance("PKCS12");
             char[] truststorePassword = "AlexReb123!".toCharArray();
-            try(InputStream keyStoreData = new FileInputStream("client.trustore")){
+            try(InputStream keyStoreData = new FileInputStream("client.truststore")){
                 truststore.load(keyStoreData, truststorePassword);
             }
 
