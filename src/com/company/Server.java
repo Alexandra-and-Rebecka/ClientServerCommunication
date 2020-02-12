@@ -83,6 +83,7 @@ class ClientHandler extends Thread {
     }
 
     public void run () {
+        int userId = 0;
         String action = "register";
         try {
             action = in.readUTF();
@@ -91,18 +92,57 @@ class ClientHandler extends Thread {
         }
 
         if (action.equals("register")) {
-            register();
+            userId = register();
         } else {
-            login();
+            userId = login();
+        }
+
+        if (userId != 0) {
+            try {
+                SessionKey sessionKey = new SessionKey();
+                String encodedKey = sessionKey.encodedSessionKey();
+
+                lock.lock();
+                try {
+                    FileInputStream file = new FileInputStream(new File("Authentication.xlsx"));
+                    XSSFWorkbook workbook = new XSSFWorkbook(file);
+                    XSSFSheet sheet = workbook.getSheetAt(0);
+
+                    Cell sessionKeyCell = sheet.getRow(userId).createCell(3);
+                    sessionKeyCell.setCellValue(encodedKey);
+
+                    FileOutputStream outputStream = new FileOutputStream("Authentication.xlsx");
+                    workbook.write(outputStream);
+                    out.writeUTF(encodedKey);
+                    file.close();
+                } finally {
+                    lock.unlock();
+                }
+
+
+            } catch (NoSuchAlgorithmException | IOException e) {
+                System.out.println(e);
+            }
+        }
+
+        System.out.println("Closing connection");
+
+        try {
+            socket.close();
+            in.close();
+            out.close();
+        } catch (IOException i) {
+            System.out.println(i);
         }
     }
 
-    private void register() {
+    private int register() {
+        boolean success = false;
         boolean userExists = false;
         String username = "";
         String password = "";
         byte[] salt = null;
-        int rowNumber;
+        int rowNumber = 0;
         int cellNumber = 0;
         FileInputStream file = null;
         XSSFWorkbook workbook = null;
@@ -156,19 +196,14 @@ class ClientHandler extends Thread {
                     FileOutputStream outputStream = new FileOutputStream("Authentication.xlsx");
                     workbook.write(outputStream);
                     out.writeUTF("New user is registered");
+                    success = true;
                 } else {
                     out.writeUTF("User already exists");
                 }
+                file.close();
             } finally {
                 lock.unlock();
             }
-
-            System.out.println("Closing connection");
-
-            socket.close();
-            in.close();
-            out.close();
-
         } catch (IOException e){
             try {
                 socket.close();
@@ -176,13 +211,19 @@ class ClientHandler extends Thread {
                 System.out.println(i);
             }
         }
+        if(success){
+            return rowNumber;
+        } else {
+            return 0;
+        }
     }
 
-    private void login() {
+    private int login() {
+        boolean success = false;
         boolean userExists = false;
         String username = "";
         String password = "";
-        int rowNumber;
+        int rowNumber = 0;
         FileInputStream file = null;
         XSSFWorkbook workbook = null;
         XSSFSheet sheet = null;
@@ -223,6 +264,7 @@ class ClientHandler extends Thread {
 
                     if (hashedPass.equals(hashedPass2)){
                         out.writeUTF("Login succeeded");
+                        success = true;
                     } else {
                         out.writeUTF("Wrong password");
                     }
@@ -235,19 +277,18 @@ class ClientHandler extends Thread {
             } finally {
                 lock.unlock();
             }
-
-            System.out.println("Closing connection");
-
-            socket.close();
-            in.close();
-            out.close();
-
+            file.close();
         } catch (IOException e){
             try {
                 socket.close();
             } catch (IOException i){
                 System.out.println(i);
             }
+        }
+        if(success){
+            return rowNumber;
+        } else {
+            return 0;
         }
     }
 }
