@@ -10,7 +10,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../poi-4.1.1/lib/activation-1.1.1.jar!/" />
+          <root url="jar://$MODULE_DIR$/../activation-1.1.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -19,7 +19,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../poi-4.1.1/lib/commons-codec-1.13.jar!/" />
+          <root url="jar://$MODULE_DIR$/../bcprov-jdk15on-164.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -28,7 +28,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../poi-4.1.1/lib/commons-collections4-4.4.jar!/" />
+          <root url="jar://$MODULE_DIR$/../commons-codec-1.13.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -37,7 +37,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../poi-4.1.1/lib/commons-compress-1.19.jar!/" />
+          <root url="jar://$MODULE_DIR$/../commons-collections4-4.4.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -46,7 +46,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../poi-4.1.1/lib/commons-logging-1.2.jar!/" />
+          <root url="jar://$MODULE_DIR$/../commons-compress-1.19.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -55,7 +55,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../poi-4.1.1/lib/commons-math3-3.6.1.jar!/" />
+          <root url="jar://$MODULE_DIR$/../commons-logging-1.2.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -64,7 +64,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../poi-4.1.1/lib/curvesapi-1.06.jar!/" />
+          <root url="jar://$MODULE_DIR$/../commons-math3-3.6.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -73,7 +73,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../poi-4.1.1/lib/jaxb-api-2.3.1.jar!/" />
+          <root url="jar://$MODULE_DIR$/../curvesapi-1.06.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -82,7 +82,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../poi-4.1.1/lib/jaxb-core-2.3.0.1.jar!/" />
+          <root url="jar://$MODULE_DIR$/../jaxb-api-2.3.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -91,7 +91,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../poi-4.1.1/lib/jaxb-impl-2.3.2.jar!/" />
+          <root url="jar://$MODULE_DIR$/../jaxb-core-2.3.0.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -100,7 +100,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../poi-4.1.1/lib/junit-4.12.jar!/" />
+          <root url="jar://$MODULE_DIR$/../jaxb-impl-2.3.2.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -109,7 +109,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../poi-4.1.1/lib/log4j-1.2.17.jar!/" />
+          <root url="jar://$MODULE_DIR$/../junit-4.12.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -118,7 +118,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../poi-4.1.1/lib/poi-4.1.1.jar!/" />
+          <root url="jar://$MODULE_DIR$/../log4j-1.2.17.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -127,7 +127,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../poi-4.1.1/lib/poi-examples-4.1.1.jar!/" />
+          <root url="jar://$MODULE_DIR$/../poi-4.1.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -136,7 +136,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../poi-4.1.1/lib/poi-excelant-4.1.1.jar!/" />
+          <root url="jar://$MODULE_DIR$/../poi-examples-4.1.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -145,7 +145,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../poi-4.1.1/lib/poi-ooxml-4.1.1.jar!/" />
+          <root url="jar://$MODULE_DIR$/../poi-excelant-4.1.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -154,7 +154,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../poi-4.1.1/lib/poi-ooxml-schemas-4.1.1.jar!/" />
+          <root url="jar://$MODULE_DIR$/../poi-ooxml-4.1.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -163,7 +163,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../poi-4.1.1/lib/poi-scratchpad-4.1.1.jar!/" />
+          <root url="jar://$MODULE_DIR$/../poi-ooxml-schemas-4.1.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -172,7 +172,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../poi-4.1.1/lib/xmlbeans-3.1.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/../poi-scratchpad-4.1.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -181,7 +181,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../bcprov-jdk15on-164.jar!/" />
+          <root url="jar://$MODULE_DIR$/../xmlbeans-3.1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

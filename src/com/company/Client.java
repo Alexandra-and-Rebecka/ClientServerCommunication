@@ -1,55 +1,63 @@
 package com.company;
 
-import java.io.DataInputStream;
-import java.io.DataOutput;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManagerFactory;
+import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.security.KeyStore;
+import java.security.SecureRandom;
+import java.security.Security;
 import java.util.Scanner;
 
 public class Client {
-
-    private Socket socket = null;
+    private SSLSocket socket = null;
     private Scanner input = null;
     private DataInputStream in = null;
     private DataOutputStream out = null;
 
     public Client( String address, int port) {
         try {
-            socket = new Socket(address, port);
+
+            KeyStore truststore = KeyStore.getInstance("PKCS12");
+            char[] truststorePassword = "AlexReb123!".toCharArray();
+            try(InputStream keyStoreData = new FileInputStream("client.truststore")){
+                truststore.load(keyStoreData, truststorePassword);
+            }
+
+            Security.addProvider(new BouncyCastleProvider());
+
+            TrustManagerFactory trustMgrFact = TrustManagerFactory.getInstance("SunX509");
+            trustMgrFact.init(truststore);
+
+            SSLContext clientContext = SSLContext.getInstance("TLS");
+            clientContext.init(null, trustMgrFact.getTrustManagers(), SecureRandom.getInstance("DEFAULT", Security.getProvider("BC")));
+
+            SSLSocketFactory fact = clientContext.getSocketFactory();
+            socket = (SSLSocket) fact.createSocket(address, port) ;
             System.out.println("Connected");
 
             input = new Scanner(System.in);
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
 
-        } catch (IOException i) {
-            System.out.println(i);
-        }
-
-        try {
             String received = in.readUTF();
             System.out.println(received);
-        } catch (IOException i) {
-            System.out.println(i);
-        }
 
-        try {
             String username = input.nextLine();
             String password = input.nextLine();
             out.writeUTF(username);
             out.writeUTF(password);
-        } catch (IOException i) {
-            System.out.println(i);
-        }
 
-        try {
             input.close();
             in.close();
             out.close();
             socket.close();
-        } catch (IOException i) {
+        } catch (Exception i) {
             System.out.println(i);
         }
     }

@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="31783b8c-6245-4f95-a9ad-31bebe214d7b" name="Default Changelist" comment="" />
+    <list default="true" id="31783b8c-6245-4f95-a9ad-31bebe214d7b" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Authentication.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/Authentication.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SimpleServerClient.iml" beforeDir="false" afterPath="$PROJECT_DIR$/SimpleServerClient.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/SimpleServerClient/com/company/Client.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/SimpleServerClient/com/company/Client.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/SimpleServerClient/com/company/ClientHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/SimpleServerClient/com/company/ClientHandler.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/SimpleServerClient/com/company/Server.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/SimpleServerClient/com/company/Server.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/company/Client.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/company/Client.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/company/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/company/Server.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -17,6 +26,9 @@
       </list>
     </option>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="ProjectId" id="1XI7CdeJa1QYHt9yBiTMG8jB5zl" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -24,13 +36,21 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../Thesis/bcprov-jdk15on-164.jar!/" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../xmlbeans-3.1.0.jar!/" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Application.Client">
+    <configuration name="Client" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="com.company.Client" />
+      <module name="SimpleServerClient" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="Server" type="Application" factoryName="Application" temporary="true">
       <option name="MAIN_CLASS_NAME" value="com.company.Server" />
       <module name="SimpleServerClient" />
@@ -40,6 +60,10 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <list>
+      <item itemvalue="Application.Client" />
+      <item itemvalue="Application.Server" />
+    </list>
     <recent_temporary>
       <list>
         <item itemvalue="Application.Server" />
@@ -60,38 +84,39 @@
     <servers />
   </component>
   <component name="WindowStateProjectService">
-    <state x="184" y="92" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1580909857788">
-      <screen x="0" y="23" width="1440" height="815" />
-    </state>
-    <state x="184" y="92" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.23.1440.815@0.23.1440.815" timestamp="1580909857788" />
-    <state x="579" y="171" key="FileChooserDialogImpl" timestamp="1580724574467">
+    <state x="196" y="70" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1580993654381">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="579" y="171" key="FileChooserDialogImpl/0.0.1536.824@0.0.1536.824" timestamp="1580724574467" />
-    <state width="1398" height="196" key="GridCell.Tab.0.bottom" timestamp="1580910241998">
-      <screen x="0" y="23" width="1440" height="815" />
+    <state x="196" y="70" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1536.824@0.0.1536.824" timestamp="1580993654381" />
+    <state x="184" y="92" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.23.1440.815@0.23.1440.815" timestamp="1580909857788" />
+    <state x="195" y="135" width="438" height="482" key="FileChooserDialogImpl" timestamp="1580991891203">
+      <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="195" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1580724848408" />
+    <state x="195" y="135" width="438" height="482" key="FileChooserDialogImpl/0.0.1536.824@0.0.1536.824" timestamp="1580991891203" />
+    <state width="724" height="195" key="GridCell.Tab.0.bottom" timestamp="1580995359145">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state width="724" height="195" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1580995359145" />
     <state width="1398" height="196" key="GridCell.Tab.0.bottom/0.23.1440.815@0.23.1440.815" timestamp="1580910241998" />
-    <state width="1398" height="196" key="GridCell.Tab.0.center" timestamp="1580910241998">
-      <screen x="0" y="23" width="1440" height="815" />
+    <state width="724" height="195" key="GridCell.Tab.0.center" timestamp="1580995359145">
+      <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="195" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1580724848408" />
+    <state width="724" height="195" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1580995359145" />
     <state width="1398" height="196" key="GridCell.Tab.0.center/0.23.1440.815@0.23.1440.815" timestamp="1580910241998" />
-    <state width="1398" height="196" key="GridCell.Tab.0.left" timestamp="1580910241997">
-      <screen x="0" y="23" width="1440" height="815" />
+    <state width="724" height="195" key="GridCell.Tab.0.left" timestamp="1580995359145">
+      <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="195" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1580724848408" />
+    <state width="724" height="195" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1580995359145" />
     <state width="1398" height="196" key="GridCell.Tab.0.left/0.23.1440.815@0.23.1440.815" timestamp="1580910241997" />
-    <state width="1398" height="196" key="GridCell.Tab.0.right" timestamp="1580910241998">
-      <screen x="0" y="23" width="1440" height="815" />
+    <state width="724" height="195" key="GridCell.Tab.0.right" timestamp="1580995359145">
+      <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="195" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1580724848408" />
+    <state width="724" height="195" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1580995359145" />
     <state width="1398" height="196" key="GridCell.Tab.0.right/0.23.1440.815@0.23.1440.815" timestamp="1580910241998" />
-    <state x="262" y="23" key="SettingsEditor" timestamp="1580909834770">
-      <screen x="0" y="23" width="1440" height="815" />
+    <state x="279" y="0" key="SettingsEditor" timestamp="1580991913219">
+      <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="279" y="0" key="SettingsEditor/0.0.1536.824@0.0.1536.824" timestamp="1580724581247" />
+    <state x="279" y="0" key="SettingsEditor/0.0.1536.824@0.0.1536.824" timestamp="1580991913219" />
     <state x="262" y="23" key="SettingsEditor/0.23.1440.815@0.23.1440.815" timestamp="1580909834770" />
   </component>
 </project>
