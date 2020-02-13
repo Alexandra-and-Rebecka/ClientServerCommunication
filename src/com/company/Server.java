@@ -11,6 +11,7 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.*;
+import java.util.Date;
 import java.util.Base64;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -85,6 +86,7 @@ class ClientHandler extends Thread {
     public void run () {
         int userId = 0;
         String action = "register";
+        Date date = new Date();
         try {
             action = in.readUTF();
         } catch (IOException e) {
@@ -110,6 +112,9 @@ class ClientHandler extends Thread {
 
                     Cell sessionKeyCell = sheet.getRow(userId).createCell(3);
                     sessionKeyCell.setCellValue(encodedKey);
+
+                    Cell timeCell = sheet.getRow(userId).createCell(4);
+                    timeCell.setCellValue(date.getTime());
 
                     FileOutputStream outputStream = new FileOutputStream("Authentication.xlsx");
                     workbook.write(outputStream);
