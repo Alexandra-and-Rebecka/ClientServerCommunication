@@ -8,7 +8,6 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import javax.net.ssl.*;
 import java.io.*;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.*;
 import java.util.Date;
@@ -39,7 +38,7 @@ public class Server {
             serverContext.init(keyMgrFact.getKeyManagers(), null, SecureRandom.getInstance("DEFAULT", Security.getProvider("BC")));
 
             SSLServerSocketFactory fact = serverContext.getServerSocketFactory();
-            SSLServerSocket server = (SSLServerSocket) fact.createServerSocket(5000);
+            server = (SSLServerSocket) fact.createServerSocket(port);
 
             System.out.println("Server started");
             System.out.println("Waiting for a client...");
@@ -85,49 +84,25 @@ class ClientHandler extends Thread {
 
     public void run () {
         int userId = 0;
-        String action = "register";
-        Date date = new Date();
+        String action = "";
+
         try {
             action = in.readUTF();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        if (action.equals("register")) {
-            userId = register();
-        } else {
-            userId = login();
-        }
-
-        if (userId != 0) {
-            try {
-                SessionKey sessionKey = new SessionKey();
-                String encodedKey = sessionKey.encodedSessionKey();
-
-                lock.lock();
-                try {
-                    FileInputStream file = new FileInputStream(new File("Authentication.xlsx"));
-                    XSSFWorkbook workbook = new XSSFWorkbook(file);
-                    XSSFSheet sheet = workbook.getSheetAt(0);
-
-                    Cell sessionKeyCell = sheet.getRow(userId).createCell(3);
-                    sessionKeyCell.setCellValue(encodedKey);
-
-                    Cell timeCell = sheet.getRow(userId).createCell(4);
-                    timeCell.setCellValue(date.getTime());
-
-                    FileOutputStream outputStream = new FileOutputStream("Authentication.xlsx");
-                    workbook.write(outputStream);
-                    out.writeUTF(encodedKey);
-                    file.close();
-                } finally {
-                    lock.unlock();
-                }
-
-
-            } catch (NoSuchAlgorithmException | IOException e) {
-                System.out.println(e);
+            
+            System.out.println(action);
+            if (action.equals("register")) {
+                userId = register();
+                createSessionToken(userId);
+            } else if (action.equals("login")) {
+                userId = login();
+                createSessionToken(userId);
+            } else if (action.equals("checkToken")) {
+                String sessionToken = in.readUTF();
+                System.out.println(sessionToken);
+                checkSessionToken(sessionToken);
             }
+        } catch (IOException e) {
+            System.out.println(e);
         }
 
         System.out.println("Closing connection");
@@ -294,6 +269,81 @@ class ClientHandler extends Thread {
             return rowNumber;
         } else {
             return 0;
+        }
+    }
+
+    private void createSessionToken(int userId){
+        Date date = new Date();
+        if (userId != 0) {
+            try {
+                SessionKey sessionKey = new SessionKey();
+                String encodedKey = sessionKey.encodedSessionKey();
+
+                lock.lock();
+                try {
+                    FileInputStream file = new FileInputStream(new File("Authentication.xlsx"));
+                    XSSFWorkbook workbook = new XSSFWorkbook(file);
+                    XSSFSheet sheet = workbook.getSheetAt(0);
+
+                    Cell sessionKeyCell = sheet.getRow(userId).createCell(3);
+                    sessionKeyCell.setCellValue(encodedKey);
+
+                    Cell timeCell = sheet.getRow(userId).createCell(4);
+                    timeCell.setCellValue(date.getTime());
+
+                    FileOutputStream outputStream = new FileOutputStream("Authentication.xlsx");
+                    workbook.write(outputStream);
+                    out.writeUTF(encodedKey);
+                    file.close();
+                } finally {
+                    lock.unlock();
+                }
+
+
+            } catch (NoSuchAlgorithmException | IOException e) {
+                System.out.println(e);
+            }
+        }
+    }
+
+    private void checkSessionToken(String sessionToken) {
+        boolean sessionValid = false;
+        int rowNumber = 0;
+        FileInputStream file = null;
+        XSSFWorkbook workbook = null;
+        XSSFSheet sheet = null;
+
+
+        lock.lock();
+        try {
+            file = new FileInputStream(new File("Authentication.xlsx"));
+            workbook = new XSSFWorkbook(file);
+            sheet = workbook.getSheetAt(0);
+
+            rowNumber = sheet.getLastRowNum();
+
+            System.out.println(rowNumber);
+            for (int i=1; i <= rowNumber; i++){
+                String sessionKey = sheet.getRow(i).getCell(3).toString();
+                if (sessionToken.equals(sessionKey)) {
+                    sessionValid = true;
+                    rowNumber = i;
+                    break;
+                }
+            }
+
+            if (sessionValid) {
+                out.writeUTF("Valid");
+            } else {
+                out.writeUTF("Invalid");
+            }
+
+            file.close();
+
+        } catch (IOException i) {
+            System.out.println(i);
+        } finally {
+            lock.unlock();
         }
     }
 }
