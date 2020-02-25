@@ -44,9 +44,6 @@ public class Client {
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
 
-            //String received = in.readUTF();
-            //System.out.println(received);
-
             String username = input.nextLine();
             String password = input.nextLine();
             out.writeUTF(username);

@@ -4,12 +4,41 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.bouncycastle.asn1.*;
+import org.bouncycastle.asn1.ocsp.Signature;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.*;
+import org.bouncycastle.asn1.x509.Certificate;
+import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.crypto.AsymmetricBlockCipher;
+import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.bouncycastle.crypto.digests.SHA1Digest;
+import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.crypto.encodings.PKCS1Encoding;
+import org.bouncycastle.crypto.engines.RSAEngine;
+import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
+import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.provider.X509CertificateObject;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
 import javax.net.ssl.*;
+import javax.security.auth.x500.X500Principal;
+
 import java.io.*;
+import java.math.BigInteger;
 import java.net.Socket;
 import java.security.*;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPrivateCrtKey;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Base64;
 import java.util.concurrent.locks.ReentrantLock;
@@ -90,7 +119,8 @@ class ClientHandler extends Thread {
             action = in.readUTF();
             
             System.out.println(action);
-            if (action.equals("register")) {
+            createCertificate();
+            /*if (action.equals("register")) {
                 userId = register();
                 createSessionToken(userId);
             } else if (action.equals("login")) {
@@ -100,8 +130,8 @@ class ClientHandler extends Thread {
                 String sessionToken = in.readUTF();
                 System.out.println(sessionToken);
                 checkSessionToken(sessionToken);
-            }
-        } catch (IOException e) {
+            }*/
+        } catch (IOException | NoSuchAlgorithmException | CertificateException | NoSuchProviderException | KeyStoreException | UnrecoverableKeyException | SignatureException | InvalidKeyException | InvalidCipherTextException | OperatorCreationException e) {
             System.out.println(e);
         }
 
@@ -345,6 +375,77 @@ class ClientHandler extends Thread {
         } finally {
             lock.unlock();
         }
+    }
+
+    private void createCertificate() throws NoSuchAlgorithmException, CertificateException, IOException, NoSuchProviderException, KeyStoreException, UnrecoverableKeyException, SignatureException, InvalidKeyException, InvalidCipherTextException, OperatorCreationException {
+        Security.addProvider(new BouncyCastleProvider());
+
+        //Generate a private RSA key
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA", "BC");
+        keyGen.initialize(2048);
+        KeyPair keyPair = keyGen.generateKeyPair();
+        PrivateKey privKey = keyPair.getPrivate();
+        PublicKey pubKey = keyPair.getPublic();
+
+        //Loading the CA private key and certificate
+        String caPassword = "AlexReb123!";
+        String caAlias = "server-cert";
+        KeyStore caKs = KeyStore.getInstance("PKCS12", "BC");
+        caKs.load(new FileInputStream(new File("serverkeystore.p12")), caPassword.toCharArray());
+        Key key = caKs.getKey(caAlias, caPassword.toCharArray());
+        if (key == null) {
+            System.out.println("Got null key from keystore!");
+        }
+        RSAPrivateCrtKey privateKey = (RSAPrivateCrtKey) key;
+        X509Certificate caCert = (X509Certificate) caKs.getCertificate(caAlias);
+        if(caCert == null) {
+            System.out.println("Got null cert from the keystore!");
+        }
+        caCert.verify(caCert.getPublicKey());
+
+        //Create x509 certificate
+        Calendar expiry = Calendar.getInstance();
+        expiry.add(Calendar.DAY_OF_YEAR, 1024);
+
+        X500Name x500Name = new X500Name("C=SE, ST=Stockholm, L=Stockholm, O=KTH, OU=CoS, CN=Alex, EMAILADDRESS=kolonia@kth.se");
+        X509v3CertificateBuilder certBuilder = new X509v3CertificateBuilder(
+                x500Name, BigInteger.valueOf(System.currentTimeMillis()),
+                new Time(new Date(System.currentTimeMillis())), new Time(expiry.getTime()),
+                x500Name, SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded())
+        );
+        JcaContentSignerBuilder builder = new JcaContentSignerBuilder("SHA256withRSA");
+        ContentSigner signer = builder.build(privateKey);
+        byte[] certBytes = certBuilder.build(signer).getEncoded();
+        CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509", "BC");
+        X509Certificate clientCert = (X509Certificate) certificateFactory.generateCertificate(new ByteArrayInputStream(certBytes));
+
+        clientCert.verify(caCert.getPublicKey());
+
+        //Writing the certificate as PKCS12 file
+        PKCS12BagAttributeCarrier bagCert = (PKCS12BagAttributeCarrier) clientCert;
+        bagCert.setBagAttribute(PKCSObjectIdentifiers.pkcs_9_at_friendlyName, new DERBMPString("clients"));
+        bagCert.setBagAttribute(
+                PKCSObjectIdentifiers.pkcs_9_at_localKeyId,
+                new SubjectKeyIdentifier(pubKey.getEncoded())
+        );
+
+        KeyStore store = KeyStore.getInstance("PKCS12");
+        store.load(null, null);
+        X509Certificate[] chain = new X509Certificate[2];
+        chain[0] = clientCert;
+        chain[1] = caCert;
+
+        for(int i = 0; i<chain.length-1; i++){
+            X500Principal issuerDN = ((X509Certificate)chain[i]).getIssuerX500Principal();
+            X500Principal subject = ((X509Certificate)chain[i+1]).getSubjectX500Principal();
+            System.out.println(issuerDN);
+            System.out.println(subject);
+        }
+
+        store.setKeyEntry("clients", privKey, "AlexReb123!".toCharArray(), chain);
+
+        FileOutputStream fOut = new FileOutputStream("clientCert.pem");
+        store.store(fOut, "AlexReb123!".toCharArray());
     }
 }
 
