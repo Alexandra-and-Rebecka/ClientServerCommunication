@@ -390,6 +390,8 @@ class ClientHandler extends Thread {
         KeyStore caKs = KeyStore.getInstance("PKCS12", "BC");
         caKs.load(new FileInputStream(new File("serverkeystore.p12")), caPassword.toCharArray());
         Key key = caKs.getKey(caAlias, caPassword.toCharArray());
+        KeyStore caTs = KeyStore.getInstance("PKCS12", "BC");
+        caTs.load(new FileInputStream(new File("server.truststore")), caPassword.toCharArray());
         if (key == null) {
             System.out.println("Got null key from keystore!");
         }
@@ -442,6 +444,7 @@ class ClientHandler extends Thread {
         store.setKeyEntry("clients", privKey, "AlexReb123!".toCharArray(), chain);
         //store.setCertificateEntry("clients", clientCert);
         store.setCertificateEntry("server", caCert);
+        store.setCertificateEntry("analysisServer-cert", caTs.getCertificate("analysisServer-cert"));
         caKs.setCertificateEntry("clients", clientCert);
 
         FileOutputStream fOut = new FileOutputStream("clientCert.pem");
