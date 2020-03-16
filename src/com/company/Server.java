@@ -7,6 +7,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.ocsp.Signature;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.util.ASN1Dump;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.*;
 import org.bouncycastle.asn1.x509.Certificate;
@@ -34,13 +35,9 @@ import java.io.*;
 import java.math.BigInteger;
 import java.net.Socket;
 import java.security.*;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
+import java.security.cert.*;
 import java.security.interfaces.RSAPrivateCrtKey;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Base64;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Server {
@@ -131,7 +128,7 @@ class ClientHandler extends Thread {
                 System.out.println(sessionToken);
                 checkSessionToken(sessionToken);
             }*/
-        } catch (IOException | NoSuchAlgorithmException | CertificateException | NoSuchProviderException | KeyStoreException | UnrecoverableKeyException | SignatureException | InvalidKeyException | InvalidCipherTextException | OperatorCreationException e) {
+        } catch (IOException | NoSuchAlgorithmException | CertificateException | NoSuchProviderException | KeyStoreException | UnrecoverableKeyException | SignatureException | InvalidKeyException | InvalidCipherTextException | OperatorCreationException | InvalidAlgorithmParameterException | CertPathValidatorException e) {
             System.out.println(e);
         }
 
@@ -377,7 +374,7 @@ class ClientHandler extends Thread {
         }
     }
 
-    private void createCertificate() throws NoSuchAlgorithmException, CertificateException, IOException, NoSuchProviderException, KeyStoreException, UnrecoverableKeyException, SignatureException, InvalidKeyException, InvalidCipherTextException, OperatorCreationException {
+    private void createCertificate() throws NoSuchAlgorithmException, CertificateException, IOException, NoSuchProviderException, KeyStoreException, UnrecoverableKeyException, SignatureException, InvalidKeyException, InvalidCipherTextException, OperatorCreationException, InvalidAlgorithmParameterException, CertPathValidatorException {
         Security.addProvider(new BouncyCastleProvider());
 
         //Generate a private RSA key
@@ -429,7 +426,7 @@ class ClientHandler extends Thread {
                 new SubjectKeyIdentifier(pubKey.getEncoded())
         );
 
-        KeyStore store = KeyStore.getInstance("PKCS12");
+        KeyStore store = KeyStore.getInstance("PKCS12", "BC");
         store.load(null, null);
         X509Certificate[] chain = new X509Certificate[2];
         chain[0] = clientCert;
@@ -443,6 +440,9 @@ class ClientHandler extends Thread {
         }
 
         store.setKeyEntry("clients", privKey, "AlexReb123!".toCharArray(), chain);
+        //store.setCertificateEntry("clients", clientCert);
+        store.setCertificateEntry("server", caCert);
+        caKs.setCertificateEntry("clients", clientCert);
 
         FileOutputStream fOut = new FileOutputStream("clientCert.pem");
         store.store(fOut, "AlexReb123!".toCharArray());
