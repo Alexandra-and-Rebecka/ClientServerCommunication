@@ -51,20 +51,36 @@ public class Server {
         try {
             Security.addProvider(new BouncyCastleProvider());
 
-            KeyStore keyStore = KeyStore.getInstance("PKCS12");
+            KeyStore keyStore = KeyStore.getInstance("PKCS12", "BC");
+            KeyStore truststore = KeyStore.getInstance("PKCS12", "BC");
             char[] keyStorePassword = "AlexReb123!".toCharArray();
-            try(InputStream keyStoreData = new FileInputStream("server.keystore")) {
-                keyStore.load(keyStoreData, keyStorePassword);
+            InputStream keyStoreData = new FileInputStream(new File("server.keystore"));
+            keyStore.load(keyStoreData, keyStorePassword);
+            keyStoreData.close();
+
+            InputStream trustStoreData = new FileInputStream(new File("server.truststore"));
+            truststore.load(trustStoreData, keyStorePassword);
+            trustStoreData.close();
+
+
+            Enumeration<String> enumeration = truststore.aliases();
+            while(enumeration.hasMoreElements()) {
+                String alias = enumeration.nextElement();
+                System.out.println("alias name: " + alias);
             }
 
             KeyManagerFactory keyMgrFact = KeyManagerFactory.getInstance("SunX509");
             keyMgrFact.init(keyStore, keyStorePassword);
 
-            SSLContext serverContext = SSLContext.getInstance("TLS");
-            serverContext.init(keyMgrFact.getKeyManagers(), null, SecureRandom.getInstance("DEFAULT", Security.getProvider("BC")));
+            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance("SunX509");
+            trustManagerFactory.init(truststore);
+
+            SSLContext serverContext = SSLContext.getInstance("TLSv1");
+            serverContext.init(keyMgrFact.getKeyManagers(), trustManagerFactory.getTrustManagers(), SecureRandom.getInstance("DEFAULT", Security.getProvider("BC")));
 
             SSLServerSocketFactory fact = serverContext.getServerSocketFactory();
             server = (SSLServerSocket) fact.createServerSocket(port);
+            server.setNeedClientAuth(true);
 
             System.out.println("Server started");
             System.out.println("Waiting for a client...");
@@ -116,8 +132,8 @@ class ClientHandler extends Thread {
             action = in.readUTF();
             
             System.out.println(action);
-            createCertificate();
-            /*if (action.equals("register")) {
+            //createCertificate();
+            if (action.equals("register")) {
                 userId = register();
                 createSessionToken(userId);
             } else if (action.equals("login")) {
@@ -127,8 +143,9 @@ class ClientHandler extends Thread {
                 String sessionToken = in.readUTF();
                 System.out.println(sessionToken);
                 checkSessionToken(sessionToken);
-            }*/
-        } catch (IOException | NoSuchAlgorithmException | CertificateException | NoSuchProviderException | KeyStoreException | UnrecoverableKeyException | SignatureException | InvalidKeyException | InvalidCipherTextException | OperatorCreationException | InvalidAlgorithmParameterException | CertPathValidatorException e) {
+            }
+
+        } catch (Exception e) {
             System.out.println(e);
         }
 
@@ -388,10 +405,15 @@ class ClientHandler extends Thread {
         String caPassword = "AlexReb123!";
         String caAlias = "server-cert";
         KeyStore caKs = KeyStore.getInstance("PKCS12", "BC");
-        caKs.load(new FileInputStream(new File("serverkeystore.p12")), caPassword.toCharArray());
+        FileInputStream inKs = new FileInputStream(new File("server.keystore"));
+        caKs.load(inKs, caPassword.toCharArray());
+        inKs.close();
         Key key = caKs.getKey(caAlias, caPassword.toCharArray());
         KeyStore caTs = KeyStore.getInstance("PKCS12", "BC");
-        caTs.load(new FileInputStream(new File("server.truststore")), caPassword.toCharArray());
+        FileInputStream inTs = new FileInputStream(new File("server.truststore"));
+        caTs.load(inTs, caPassword.toCharArray());
+        inTs.close();
+
         if (key == null) {
             System.out.println("Got null key from keystore!");
         }
@@ -429,7 +451,9 @@ class ClientHandler extends Thread {
         );
 
         KeyStore store = KeyStore.getInstance("PKCS12", "BC");
+        KeyStore truststore = KeyStore.getInstance("PKCS12", "BC");
         store.load(null, null);
+        truststore.load(null, null);
         X509Certificate[] chain = new X509Certificate[2];
         chain[0] = clientCert;
         chain[1] = caCert;
@@ -437,18 +461,36 @@ class ClientHandler extends Thread {
         for(int i = 0; i<chain.length-1; i++){
             X500Principal issuerDN = ((X509Certificate)chain[i]).getIssuerX500Principal();
             X500Principal subject = ((X509Certificate)chain[i+1]).getSubjectX500Principal();
-            System.out.println(issuerDN);
-            System.out.println(subject);
         }
 
-        store.setKeyEntry("clients", privKey, "AlexReb123!".toCharArray(), chain);
-        //store.setCertificateEntry("clients", clientCert);
-        store.setCertificateEntry("server", caCert);
-        store.setCertificateEntry("analysisServer-cert", caTs.getCertificate("analysisServer-cert"));
-        caKs.setCertificateEntry("clients", clientCert);
+        KeyStore analTs = KeyStore.getInstance("PKCS12", "BC");
+        FileInputStream inAnalTs = new FileInputStream(new File("analysisServer.truststore"));
+        analTs.load(inAnalTs, caPassword.toCharArray());
+        inAnalTs.close();
 
-        FileOutputStream fOut = new FileOutputStream("clientCert.pem");
+        store.setKeyEntry("clientTest-cert", privKey, "AlexReb123!".toCharArray(), chain);
+        truststore.setCertificateEntry("clientTest-cert", clientCert);
+        truststore.setCertificateEntry("server", caCert);
+        truststore.setCertificateEntry("analysisServer-cert", caTs.getCertificate("analysisServer-cert"));
+        caTs.setCertificateEntry("clientTest-cert", clientCert);
+        analTs.setCertificateEntry("clientTest-cert", clientCert);
+
+
+        FileOutputStream fOut = new FileOutputStream("clientTest.keystore");
         store.store(fOut, "AlexReb123!".toCharArray());
+        fOut.close();
+
+        FileOutputStream fOut1 = new FileOutputStream("clientTest.truststore");
+        truststore.store(fOut1, "AlexReb123!".toCharArray());
+        fOut1.close();
+
+        FileOutputStream fOut2 = new FileOutputStream("server.truststore");
+        caTs.store(fOut2, "AlexReb123!".toCharArray());
+        fOut2.close();
+
+        FileOutputStream fOut3 = new FileOutputStream("analysisServer.truststore");
+        analTs.store(fOut3, "AlexReb123!".toCharArray());
+        fOut3.close();
     }
 }
 

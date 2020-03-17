@@ -28,20 +28,29 @@ public class AnalysisServer {
         try {
             Security.addProvider(new BouncyCastleProvider());
 
-            KeyStore keyStore = KeyStore.getInstance("PKCS12");
+            KeyStore keyStore = KeyStore.getInstance("PKCS12", "BC");
+            KeyStore truststore = KeyStore.getInstance("PKCS12", "BC");
             char[] keyStorePassword = "AlexReb123!".toCharArray();
             try(InputStream keyStoreData = new FileInputStream("analysisServer.keystore")) {
                 keyStore.load(keyStoreData, keyStorePassword);
+            }
+            try(InputStream trustStoreData = new FileInputStream("analysisServer.truststore")) {
+                truststore.load(trustStoreData, keyStorePassword);
             }
 
             KeyManagerFactory keyMgrFact = KeyManagerFactory.getInstance("SunX509");
             keyMgrFact.init(keyStore, keyStorePassword);
 
-            SSLContext serverContext = SSLContext.getInstance("TLS");
-            serverContext.init(keyMgrFact.getKeyManagers(), null, SecureRandom.getInstance("DEFAULT", Security.getProvider("BC")));
+            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance("SunX509");
+            trustManagerFactory.init(truststore);
+
+            SSLContext serverContext = SSLContext.getInstance("TLSv1");
+            serverContext.init(keyMgrFact.getKeyManagers(), trustManagerFactory.getTrustManagers(), SecureRandom.getInstance("DEFAULT", Security.getProvider("BC")));
 
             SSLServerSocketFactory fact = serverContext.getServerSocketFactory();
             server = (SSLServerSocket) fact.createServerSocket(port);
+            server.setNeedClientAuth(true);
+
 
             System.out.println("Analysis Server started");
             System.out.println("Waiting for a client...");
