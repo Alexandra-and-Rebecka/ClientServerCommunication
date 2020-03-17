@@ -5,31 +5,17 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.bouncycastle.asn1.*;
-import org.bouncycastle.asn1.ocsp.Signature;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.util.ASN1Dump;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.*;
-import org.bouncycastle.asn1.x509.Certificate;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
-import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.InvalidCipherTextException;
-import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.crypto.encodings.PKCS1Encoding;
-import org.bouncycastle.crypto.engines.RSAEngine;
-import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.jce.provider.X509CertificateObject;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.x509.extension.X509ExtensionUtil;
-
 import javax.net.ssl.*;
-import javax.security.auth.x500.X500Principal;
 
 import java.io.*;
 import java.math.BigInteger;
@@ -47,7 +33,7 @@ public class Server {
     private DataInputStream in = null;
     private DataOutputStream out = null;
 
-    public Server(int port) throws KeyStoreException {
+    public Server(int port) {
         try {
             Security.addProvider(new BouncyCastleProvider());
 
@@ -61,13 +47,6 @@ public class Server {
             InputStream trustStoreData = new FileInputStream(new File("server.truststore"));
             truststore.load(trustStoreData, keyStorePassword);
             trustStoreData.close();
-
-
-            Enumeration<String> enumeration = truststore.aliases();
-            while(enumeration.hasMoreElements()) {
-                String alias = enumeration.nextElement();
-                System.out.println("alias name: " + alias);
-            }
 
             KeyManagerFactory keyMgrFact = KeyManagerFactory.getInstance("SunX509");
             keyMgrFact.init(keyStore, keyStorePassword);
@@ -105,7 +84,7 @@ public class Server {
             System.out.println(i);
         }
     }
-    public static void main(String args[]) throws KeyStoreException {
+    public static void main(String args[]) {
         Server server = new Server(5000);
     }
 }
@@ -342,8 +321,6 @@ class ClientHandler extends Thread {
                 } finally {
                     lock.unlock();
                 }
-
-
             } catch (NoSuchAlgorithmException | IOException e) {
                 System.out.println(e);
             }
@@ -357,13 +334,11 @@ class ClientHandler extends Thread {
         XSSFWorkbook workbook = null;
         XSSFSheet sheet = null;
 
-
         lock.lock();
         try {
             file = new FileInputStream(new File("Authentication.xlsx"));
             workbook = new XSSFWorkbook(file);
             sheet = workbook.getSheetAt(0);
-
             rowNumber = sheet.getLastRowNum();
 
             System.out.println(rowNumber);
@@ -404,11 +379,14 @@ class ClientHandler extends Thread {
         //Loading the CA private key and certificate
         String caPassword = "AlexReb123!";
         String caAlias = "server-cert";
+
         KeyStore caKs = KeyStore.getInstance("PKCS12", "BC");
         FileInputStream inKs = new FileInputStream(new File("server.keystore"));
         caKs.load(inKs, caPassword.toCharArray());
         inKs.close();
+
         Key key = caKs.getKey(caAlias, caPassword.toCharArray());
+
         KeyStore caTs = KeyStore.getInstance("PKCS12", "BC");
         FileInputStream inTs = new FileInputStream(new File("server.truststore"));
         caTs.load(inTs, caPassword.toCharArray());
@@ -417,6 +395,7 @@ class ClientHandler extends Thread {
         if (key == null) {
             System.out.println("Got null key from keystore!");
         }
+
         RSAPrivateCrtKey privateKey = (RSAPrivateCrtKey) key;
         X509Certificate caCert = (X509Certificate) caKs.getCertificate(caAlias);
         if(caCert == null) {
@@ -458,23 +437,20 @@ class ClientHandler extends Thread {
         chain[0] = clientCert;
         chain[1] = caCert;
 
-        for(int i = 0; i<chain.length-1; i++){
-            X500Principal issuerDN = ((X509Certificate)chain[i]).getIssuerX500Principal();
-            X500Principal subject = ((X509Certificate)chain[i+1]).getSubjectX500Principal();
-        }
-
         KeyStore analTs = KeyStore.getInstance("PKCS12", "BC");
         FileInputStream inAnalTs = new FileInputStream(new File("analysisServer.truststore"));
         analTs.load(inAnalTs, caPassword.toCharArray());
         inAnalTs.close();
 
         store.setKeyEntry("clientTest-cert", privKey, "AlexReb123!".toCharArray(), chain);
+
+        //Import certificates to truststores
         truststore.setCertificateEntry("clientTest-cert", clientCert);
         truststore.setCertificateEntry("server", caCert);
         truststore.setCertificateEntry("analysisServer-cert", caTs.getCertificate("analysisServer-cert"));
+
         caTs.setCertificateEntry("clientTest-cert", clientCert);
         analTs.setCertificateEntry("clientTest-cert", clientCert);
-
 
         FileOutputStream fOut = new FileOutputStream("clientTest.keystore");
         store.store(fOut, "AlexReb123!".toCharArray());

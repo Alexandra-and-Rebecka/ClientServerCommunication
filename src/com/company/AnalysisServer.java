@@ -1,7 +1,6 @@
 package com.company;
 
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -10,12 +9,8 @@ import javax.net.ssl.*;
 import java.io.*;
 import java.net.Socket;
 import java.security.KeyStore;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.Security;
-import java.util.Base64;
-import java.util.Date;
-import java.util.Scanner;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class AnalysisServer {
@@ -96,7 +91,6 @@ class AnalysisClientHandler extends Thread {
     public void run () {
         boolean sessionTokenValid = false;
         int rowNumber = 0;
-        int cellNumber = 0;
         FileInputStream file = null;
         XSSFWorkbook workbook = null;
         XSSFSheet sheet = null;
