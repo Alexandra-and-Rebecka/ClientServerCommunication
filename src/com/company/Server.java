@@ -32,6 +32,7 @@ public class Server {
     private SSLServerSocket server = null;
     private DataInputStream in = null;
     private DataOutputStream out = null;
+    private OutputStream outputStream = null;
 
     public Server(int port) {
         try {
@@ -70,11 +71,12 @@ public class Server {
                     System.out.println("Client accepted");
 
                     in = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+                    outputStream = socket.getOutputStream();
                     out = new DataOutputStream(socket.getOutputStream());
 
                     System.out.println("Assigning new thread for this client");
 
-                    Thread t = new ClientHandler(socket, in, out);
+                    Thread t = new ClientHandler(socket, in, out, outputStream);
                     t.start();
                 } catch (Exception e) {
                     socket.close();
@@ -95,11 +97,13 @@ class ClientHandler extends Thread {
 
     final DataInputStream in;
     final DataOutputStream out;
+    final OutputStream outputStream;
     final Socket socket;
 
-    public ClientHandler (Socket socket, DataInputStream in, DataOutputStream out) {
+    public ClientHandler (Socket socket, DataInputStream in, DataOutputStream out, OutputStream outputStream) {
         this.in = in;
         this.out = out;
+        this.outputStream = outputStream;
         this.socket = socket;
     }
 
@@ -123,7 +127,6 @@ class ClientHandler extends Thread {
                 System.out.println(sessionToken);
                 checkSessionToken(sessionToken);
             }
-
         } catch (Exception e) {
             System.out.println(e);
         }
@@ -134,6 +137,7 @@ class ClientHandler extends Thread {
             socket.close();
             in.close();
             out.close();
+            outputStream.close();
         } catch (IOException i) {
             System.out.println(i);
         }
@@ -467,6 +471,34 @@ class ClientHandler extends Thread {
         FileOutputStream fOut3 = new FileOutputStream("analysisServer.truststore");
         analTs.store(fOut3, "AlexReb123!".toCharArray());
         fOut3.close();
+
+
+        //Send trustStore
+        System.out.println("Sending truststore");
+        File f = new File("clientTest.truststore");
+        FileInputStream inS = new FileInputStream(f);
+        byte[] b = new byte[inS.available()];
+        inS.read(b);
+
+        outputStream.write(b);
+        outputStream.flush();
+        inS.close();
+
+        System.out.println(in.readUTF());
+        //Sending keystore
+        System.out.println("Sending keystore");
+
+        f = new File("clientTest.keystore");
+        inS = new FileInputStream(f);
+        b = new byte[inS.available()];
+        inS.read(b);
+
+        outputStream.write(b);
+        outputStream.flush();
+        inS.close();
+
+        System.out.println(in.readUTF());
+
     }
 }
 
