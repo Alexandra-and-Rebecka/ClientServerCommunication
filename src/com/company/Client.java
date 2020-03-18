@@ -7,8 +7,6 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 import java.io.*;
-import java.net.Socket;
-import java.net.UnknownHostException;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.Security;
@@ -20,7 +18,8 @@ public class Client {
     private DataInputStream in = null;
     private DataOutputStream out = null;
 
-    public Client( String address, int port) {
+
+    public Client(String address, int port) {
         try {
 
             KeyStore truststore = KeyStore.getInstance("PKCS12");
@@ -45,14 +44,12 @@ public class Client {
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
 
-            String received = in.readUTF();
-            System.out.println(received);
-
             String username = input.nextLine();
             String password = input.nextLine();
             out.writeUTF(username);
             out.writeUTF(password);
 
+            System.out.println("closing");
             input.close();
             in.close();
             out.close();
@@ -62,6 +59,6 @@ public class Client {
         }
     }
     public static void main (String args[]) {
-        Client client = new Client("localhost", 5000);
+        Client client = new Client("localhost", 5050);
     }
 }
