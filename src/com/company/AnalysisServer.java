@@ -7,21 +7,23 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import javax.net.ssl.*;
 import java.io.*;
-import java.net.Socket;
+import java.net.*;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class AnalysisServer {
-    private SSLSocket socket = null;
-    private SSLServerSocket server = null;
+    private Socket socket = null;
+    private ServerSocket server = null;
+    //private SSLSocket socket = null;
+    //private SSLServerSocket server = null;
     private DataInputStream in = null;
     private DataOutputStream out = null;
 
     public AnalysisServer(int port) {
         try {
-            Security.addProvider(new BouncyCastleProvider());
+            /*Security.addProvider(new BouncyCastleProvider());
 
             KeyStore keyStore = KeyStore.getInstance("PKCS12", "BC");
             KeyStore truststore = KeyStore.getInstance("PKCS12", "BC");
@@ -45,14 +47,22 @@ public class AnalysisServer {
             SSLServerSocketFactory fact = serverContext.getServerSocketFactory();
             server = (SSLServerSocket) fact.createServerSocket(port);
             server.setNeedClientAuth(true);
+             */
 
+            server = new ServerSocket(port);
 
             System.out.println("Analysis Server started");
             System.out.println("Waiting for a client...");
 
             while (true) {
                 try {
-                    socket = (SSLSocket) server.accept();
+                    socket = server.accept();
+                    InetSocketAddress sockaddr = (InetSocketAddress)socket.getRemoteSocketAddress();
+                    InetAddress inaddr = sockaddr.getAddress();
+                    Inet4Address in4addr = (Inet4Address)inaddr;
+                    String ip4string = in4addr.toString();
+                    System.out.println(ip4string);
+
                     System.out.println("Client accepted");
 
                     in = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
@@ -98,17 +108,21 @@ class AnalysisClientHandler extends Thread {
         String sessionToken = "";
 
         try {
+            System.out.println(in.readUTF());
+            out.writeUTF("Okay!");
+
             message = in.readUTF();
             sessionToken = in.readUTF();
+            out.writeUTF("Received");
         } catch (Exception e) {
             System.out.println(e);
         }
 
-        AnalysisServerAsClient analysisServerAsClient = new AnalysisServerAsClient("localhost", 5000);
-        sessionTokenValid = analysisServerAsClient.isSessionTokenValid(sessionToken);
-        analysisServerAsClient.closeConnection();
+        //AnalysisServerAsClient analysisServerAsClient = new AnalysisServerAsClient("localhost", 5000);
+        //sessionTokenValid = analysisServerAsClient.isSessionTokenValid(sessionToken);
+        //analysisServerAsClient.closeConnection();
 
-        if (sessionTokenValid) {
+        if (true) {
             lock.lock();
             try {
                 file = new FileInputStream(new File("AnalysisServer.xlsx"));
@@ -135,6 +149,7 @@ class AnalysisClientHandler extends Thread {
         System.out.println("Closing connection");
 
         try {
+            out.writeUTF("Done");
             socket.close();
             in.close();
             out.close();

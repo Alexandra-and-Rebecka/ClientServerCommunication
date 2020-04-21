@@ -117,11 +117,9 @@ class ClientHandler extends Thread {
             System.out.println(action);
             //createCertificate();
             if (action.equals("register")) {
-                userId = register();
-                createSessionToken(userId);
+                register();
             } else if (action.equals("login")) {
-                userId = login();
-                createSessionToken(userId);
+                login();
             } else if (action.equals("checkToken")) {
                 String sessionToken = in.readUTF();
                 System.out.println(sessionToken);
@@ -156,8 +154,6 @@ class ClientHandler extends Thread {
         XSSFSheet sheet = null;
 
         try {
-            out.writeUTF("Give a username and a password");
-
             try {
                 username = in.readUTF();
                 password = in.readUTF();
@@ -202,7 +198,9 @@ class ClientHandler extends Thread {
 
                     FileOutputStream outputStream = new FileOutputStream("Authentication.xlsx");
                     workbook.write(outputStream);
-                    out.writeUTF("New user is registered");
+                    out.writeUTF("Success");
+                    createSessionToken(rowNumber);
+                    createCertificate();
                     success = true;
                 } else {
                     out.writeUTF("User already exists");
@@ -211,7 +209,7 @@ class ClientHandler extends Thread {
             } finally {
                 lock.unlock();
             }
-        } catch (IOException e){
+        } catch (IOException | NoSuchAlgorithmException | CertificateException | NoSuchProviderException | KeyStoreException | UnrecoverableKeyException | SignatureException | InvalidKeyException | InvalidCipherTextException | OperatorCreationException | InvalidAlgorithmParameterException | CertPathValidatorException e){
             try {
                 socket.close();
             } catch (IOException i){
@@ -236,8 +234,6 @@ class ClientHandler extends Thread {
         XSSFSheet sheet = null;
 
         try {
-            out.writeUTF("Give a username and a password");
-
             try {
                 username = in.readUTF();
                 password = in.readUTF();
@@ -270,7 +266,9 @@ class ClientHandler extends Thread {
                     String hashedPass2 = HashPassword.getHashedPassword(password, salt);
 
                     if (hashedPass.equals(hashedPass2)){
-                        out.writeUTF("Login succeeded");
+                        out.writeUTF("Success");
+                        createSessionToken(rowNumber);
+
                         success = true;
                     } else {
                         out.writeUTF("Wrong password");
@@ -485,6 +483,7 @@ class ClientHandler extends Thread {
         inS.close();
 
         System.out.println(in.readUTF());
+
         //Sending keystore
         System.out.println("Sending keystore");
 
